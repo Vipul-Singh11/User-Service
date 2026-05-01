@@ -9,15 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    /**
-     * Fetch currently authenticated user using SecurityContext
-     */
     @Override
     public UserResponse getCurrentUser() {
 
@@ -33,9 +32,6 @@ public class UserServiceImpl implements UserService {
         return mapToResponse(user);
     }
 
-    /**
-     * Fetch user by ID (Admin use case)
-     */
     @Override
     public UserResponse getUserById(Long id) {
 
@@ -46,9 +42,36 @@ public class UserServiceImpl implements UserService {
         return mapToResponse(user);
     }
 
-    /**
-     * Entity → DTO mapping
-     */
+    // 🔥 WALLET: CREDIT
+    @Override
+    public void credit(Long userId, BigDecimal amount) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with id: " + userId));
+
+        user.setWalletBalance(user.getWalletBalance().add(amount));
+
+        userRepository.save(user);
+    }
+
+    // 🔥 WALLET: DEBIT
+    @Override
+    public void debit(Long userId, BigDecimal amount) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with id: " + userId));
+
+        if (user.getWalletBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient balance");
+        }
+
+        user.setWalletBalance(user.getWalletBalance().subtract(amount));
+
+        userRepository.save(user);
+    }
+
     private UserResponse mapToResponse(User user) {
 
         return UserResponse.builder()
