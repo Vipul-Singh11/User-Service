@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService {
         return mapToResponse(user);
     }
 
-    // 🔥 WALLET: CREDIT
     @Override
     public void credit(Long userId, BigDecimal amount) {
 
@@ -55,7 +54,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    // 🔥 WALLET: DEBIT
     @Override
     public void debit(Long userId, BigDecimal amount) {
 
