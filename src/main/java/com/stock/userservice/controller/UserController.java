@@ -25,7 +25,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // 🔥 WALLET: CREDIT
     @PostMapping("/credit")
     public ResponseEntity<String> credit(@RequestParam Long userId,
                                          @RequestParam BigDecimal amount) {
@@ -34,7 +33,6 @@ public class UserController {
         return ResponseEntity.ok("Wallet credited");
     }
 
-    // 🔥 WALLET: DEBIT
     @PostMapping("/debit")
     public ResponseEntity<String> debit(@RequestParam Long userId,
                                         @RequestParam BigDecimal amount) {
