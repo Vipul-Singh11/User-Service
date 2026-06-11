@@ -30,6 +30,9 @@ public class User {
     @Column(nullable = false)
     private BigDecimal walletBalance;
 
+    @Column(nullable = false)
+    private BigDecimal reservedBalance;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 }

@@ -13,4 +13,10 @@ public interface UserService {
     void credit(Long userId, BigDecimal amount);
 
     void debit(Long userId, BigDecimal amount);
+
+    void reserveAmount(Long userId, BigDecimal amount);
+
+    void releaseAmount(Long userId, BigDecimal amount);
+
+    void consumeReservedAmount(Long userId, BigDecimal amount);
 }

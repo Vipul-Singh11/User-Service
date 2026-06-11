@@ -75,11 +75,86 @@ public class UserServiceImpl implements UserService {
     private UserResponse mapToResponse(User user) {
 
         return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .walletBalance(user.getWalletBalance())
-                .role(user.getRole().name())
-                .build();
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .walletBalance(user.getWalletBalance())
+            .reservedBalance(user.getReservedBalance())
+            .availableBalance(
+                    user.getWalletBalance()
+                            .subtract(user.getReservedBalance())
+            )
+            .role(user.getRole().name())
+            .build();
+    }
+
+    @Override
+    public void reserveAmount(Long userId, BigDecimal amount) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id: " + userId));
+
+        BigDecimal availableBalance =
+                user.getWalletBalance()
+                        .subtract(user.getReservedBalance());
+
+        if (availableBalance.compareTo(amount) < 0) {
+            throw new RuntimeException(
+                    "Insufficient available balance");
+        }
+
+        user.setReservedBalance(
+                user.getReservedBalance().add(amount));
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void releaseAmount(Long userId, BigDecimal amount) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id: " + userId));
+
+        if (user.getReservedBalance().compareTo(amount) < 0) {
+            throw new RuntimeException(
+                    "Reserved balance cannot become negative");
+        }
+
+        user.setReservedBalance(
+                user.getReservedBalance().subtract(amount));
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void consumeReservedAmount(
+            Long userId,
+            BigDecimal amount) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id: " + userId));
+
+        if (user.getReservedBalance()
+                .compareTo(amount) < 0) {
+
+            throw new RuntimeException(
+                    "Insufficient reserved balance");
+        }
+
+        user.setReservedBalance(
+                user.getReservedBalance()
+                        .subtract(amount));
+
+        user.setWalletBalance(
+                user.getWalletBalance()
+                        .subtract(amount));
+
+        userRepository.save(user);
     }
 }
